@@ -4,14 +4,16 @@ import { AppEvent } from "../../../app/types/events";
 
 interface EventListItemProps {
   event: AppEvent;
+  selectedEvent: (event: AppEvent) => void;
+  deleteEvent: (eventId: string) => void;
 }
-export default function EventListItem({ event }: EventListItemProps) {
+export default function EventListItem({ event, selectedEvent, deleteEvent }: EventListItemProps) {
   return (
     <SegmentGroup>
       <Segment>
         <ItemGroup>
           <Item>
-            <Item.Image size='tiny' circular src={event.hostPhotoURL} />
+            <Item.Image size='tiny' circular src={event.hostPhotoURL || '/user.png'} />
             <Item.Content>
               <Item.Header>{event.title}</Item.Header>
               <Item.Description>
@@ -36,7 +38,17 @@ export default function EventListItem({ event }: EventListItemProps) {
       </Segment>
       <Segment clearing>
         <span>{event.description}</span>
-        <Button color='teal' floated='right' content='View' />
+        <Button
+          color='red'
+          floated="right"
+          content='Delete'
+          onClick={() => deleteEvent(event.id)}
+        />
+        <Button color='teal'
+          floated='right'
+          content='View'
+          onClick={() => selectedEvent(event)}
+        />
       </Segment>
     </SegmentGroup>
   );

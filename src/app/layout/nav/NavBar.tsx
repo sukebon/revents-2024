@@ -1,7 +1,7 @@
 import { Button, Container, Menu, MenuItem } from 'semantic-ui-react';
 
 interface NavBarProps {
-  setFormOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  setFormOpen: () => void;
 }
 
 export default function NavBar({ setFormOpen }: NavBarProps) {
@@ -19,7 +19,7 @@ export default function NavBar({ setFormOpen }: NavBarProps) {
             positive={true}
             inverted={true}
             content="Create event"
-            onClick={() => setFormOpen(true)}
+            onClick={() => setFormOpen()}
           />
         </MenuItem>
         <MenuItem position='right'>
