@@ -1,33 +1,82 @@
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Button, Form, Header, Segment } from 'semantic-ui-react';
-import { useAppDispatch, useAppSelector } from '../../../app/store/store';
-import { createEvent, updateEvent } from './eventSlice';
-import { createId } from '@paralleldrive/cuid2';
+import { useAppSelector } from '../../../app/store/store';
 import { Controller, FieldValues, useForm } from 'react-hook-form';
 import { categoryOptions } from './categoryOptions';
 import 'react-datepicker/dist/react-datepicker.css';
 import DatePicker from 'react-datepicker';
+import { AppEvent } from '../../../app/types/events';
+import { Timestamp } from 'firebase/firestore';
+import { toast } from 'react-toastify';
+import { useEffect } from 'react';
+import { actions } from "../form/eventSlice";
+import LoadingComponent from '../../../app/layout/LoadingComponent';
+import { useFireStore } from '../../../app/hooks/firestore/useFirestore';
 
 export default function EventForm() {
-  const { register, handleSubmit, control, setValue, formState: { errors, isValid, isSubmitting } } = useForm({
-    mode: 'onTouched'
-  });
-  let { id } = useParams();
+  const { id } = useParams();
   const event = useAppSelector(state =>
-    state.events.events.find(event => event.id === id));
-  const dispatch = useAppDispatch();
+    state.events.data.find(event => event.id === id));
+  const { loadDocument, update, create } = useFireStore('events');
+  const { status } = useAppSelector(state => state.events);
+
+  useEffect(() => {
+    if (!id) return;
+    loadDocument(id, actions);
+  }, [id, loadDocument]);
+
+  const { register, handleSubmit, control, setValue, formState: { errors, isValid, isSubmitting } } = useForm({
+    mode: 'onTouched',
+    defaultValues: async () => {
+      if (event) return { ...event, date: new Date(event.date) };
+    }
+  });
+
   const navigate = useNavigate();
 
-
-  function onSubmit(data: FieldValues) {
-    id = id ?? createId();
-    event
-      ? dispatch(updateEvent({ ...event, ...data, date: data.date.toString() }))
-      : dispatch(createEvent({
-        ...data, id: id, hostedBy: 'bog', attendees: [], hostPhotoURL: '/categoryImages/music.jpg', date: data.date.toString()
-      }));
-    navigate(`/events/${id}`);
+  async function updateEvent(data: AppEvent) {
+    if (!event) return;
+    await update(data.id, {
+      ...data,
+      date: Timestamp.fromDate(data.date as unknown as Date)
+    });
   }
+
+  async function createEvent(data: FieldValues) {
+    const ref = await create({
+      ...data,
+      hostedBy: 'bog',
+      attendees: [],
+      hostPhotoURL: '',
+      date: Timestamp.fromDate(data.date as unknown as Date)
+    });
+    return ref;
+  }
+
+  async function handleCancelToggle(event: AppEvent) {
+    await update(event.id, {
+      isCancelled: !event.isCancelled
+    });
+    toast.success(`Event has been ${event.isCancelled} ? 'uncancelled' : 'cancelled'`);
+  }
+
+
+  async function onSubmit(data: FieldValues) {
+    try {
+      if (event) {
+        await updateEvent({ ...event, ...data });
+        navigate(`/ events / ${event.id}`);
+      } else {
+        const ref = await createEvent(data);
+        navigate(`/ events / ${ref?.id}`);
+      }
+    } catch (err: any) {
+      toast.error(err.message);
+      console.log(err.message);
+    }
+  }
+
+  if (status === 'loading' && id) return <LoadingComponent />;
 
   return (
     <Segment clearing>
@@ -91,7 +140,24 @@ export default function EventForm() {
             )}
           />
         </Form.Field>
-        <Button loading={isSubmitting} disabled={!isValid} type='submit' floated='right' positive content='Submit' />
+
+        {event && (
+          <Button
+            type='button'
+            floated='left'
+            color={event.isCancelled ? 'green' : 'red'}
+            content={event.isCancelled ? 'Reactivate event' : 'Cancel event'}
+            onClick={() => handleCancelToggle(event)}
+          />
+        )}
+        <Button
+          loading={isSubmitting}
+          disabled={!isValid}
+          type='submit'
+          floated='right'
+          positive
+          content='Submit'
+        />
         <Button
           disabled={isSubmitting}
           as={Link}
@@ -104,5 +170,3 @@ export default function EventForm() {
     </Segment>
   );
 }
-
-
