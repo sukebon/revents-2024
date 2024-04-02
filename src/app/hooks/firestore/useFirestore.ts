@@ -102,5 +102,13 @@ export const useFireStore = <T extends DocumentData>(path: string) => {
     }
   };
 
-  return { loadCollection, loadDocument, create, update, remove };
+  const set = async (id: string, data: any) => {
+    try {
+      return await setDoc(doc(db, path, id), data);
+    } catch (err: any) {
+      console.log(err);
+      toast.error(err.message);
+    }
+  };
+  return { loadCollection, loadDocument, create, update, remove, set };
 };
