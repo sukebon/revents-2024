@@ -6,7 +6,7 @@ import { categoryOptions } from './categoryOptions';
 import 'react-datepicker/dist/react-datepicker.css';
 import DatePicker from 'react-datepicker';
 import { AppEvent } from '../../../app/types/events';
-import { Timestamp } from 'firebase/firestore';
+import { Timestamp, arrayUnion } from 'firebase/firestore';
 import { toast } from 'react-toastify';
 import { useEffect } from 'react';
 import { actions } from "../form/eventSlice";
@@ -19,6 +19,7 @@ export default function EventForm() {
     state.events.data.find(event => event.id === id));
   const { loadDocument, update, create } = useFireStore('events');
   const { status } = useAppSelector(state => state.events);
+  const { currentUser } = useAppSelector(state => state.auth);
 
   useEffect(() => {
     if (!id) return;
@@ -43,11 +44,18 @@ export default function EventForm() {
   }
 
   async function createEvent(data: FieldValues) {
+    if (!currentUser) return;
     const ref = await create({
       ...data,
-      hostedBy: 'bog',
-      attendees: [],
-      hostPhotoURL: '',
+      hostUid: currentUser.uid,
+      hostedBy: currentUser.displayName,
+      hostPhotoURL: currentUser.photoURL,
+      attendees: arrayUnion({
+        id: currentUser.uid,
+        displayName: currentUser.displayName,
+        photoURL: currentUser.photoURL
+      }),
+      attendeeIds: arrayUnion(currentUser.uid),
       date: Timestamp.fromDate(data.date as unknown as Date)
     });
     return ref;
@@ -65,10 +73,10 @@ export default function EventForm() {
     try {
       if (event) {
         await updateEvent({ ...event, ...data });
-        navigate(`/ events / ${event.id}`);
+        navigate(`/events/ ${event.id}`);
       } else {
         const ref = await createEvent(data);
-        navigate(`/ events / ${ref?.id}`);
+        navigate(`/events/${ref?.id}`);
       }
     } catch (err: any) {
       toast.error(err.message);

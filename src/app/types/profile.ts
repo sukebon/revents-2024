@@ -8,6 +8,6 @@ export type Profile = {
 
 export type Photo = {
   id: string;
-  name: string;
+  displayName: string;
   url: string;
 };

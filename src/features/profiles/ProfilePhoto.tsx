@@ -77,6 +77,7 @@ export default function ProfilePhoto({ profile }: Props) {
                         basic
                         color='red'
                         icon='trash'
+                        disabled={photo.url === profile.photoURL}
                       />
                     </Button.Group>
                   )}
