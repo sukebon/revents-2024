@@ -28,7 +28,7 @@ export default function AccountPage() {
   useEffect(() => {
     if (password2) trigger('password2');
   }, [password2, trigger, password1]);
-
+  console.log(errors.password2?.type);
   async function onSubmit(data: FieldValues) {
     console.log(data);
     try {
