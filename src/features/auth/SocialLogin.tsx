@@ -13,6 +13,7 @@ export default function SocialLogin() {
     loading: false,
     provider: null
   });
+
   const { set } = useFireStore('profiles');
   const dispatch = useAppDispatch();
 
