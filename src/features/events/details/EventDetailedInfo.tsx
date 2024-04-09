@@ -1,5 +1,6 @@
 import { Segment, Grid, Icon, Button } from "semantic-ui-react";
 import { AppEvent } from "../../../app/types/events";
+import { format } from "date-fns";
 
 type Props = {
   event: AppEvent;
@@ -24,7 +25,7 @@ export default function EventDetailedInfo({ event }: Props) {
             <Icon name="calendar" size="large" color="teal" />
           </Grid.Column>
           <Grid.Column width={15}>
-            <span>{event.date}</span>
+            <span>{format(event.date, 'yyyy-MM-dd h-mm a')}</span>
           </Grid.Column>
         </Grid>
       </Segment>

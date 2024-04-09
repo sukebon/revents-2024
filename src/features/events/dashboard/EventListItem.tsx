@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import { useAppSelector } from "../../../app/store/store";
 import LoadingComponent from "../../../app/layout/LoadingComponent";
 import { useFireStore } from "../../../app/hooks/firestore/useFirestore";
+import { format } from "date-fns";
 
 interface EventListItemProps {
   event: AppEvent;
@@ -40,7 +41,7 @@ export default function EventListItem({ event }: EventListItemProps) {
       </Segment>
       <Segment>
         <span>
-          <Icon name='clock' />{event.date}
+          <Icon name='clock' />{format(event.date, 'yyyy-MM-dd h-mm a')}
           <Icon name="marker" />{event.venue}
         </span>
       </Segment>
