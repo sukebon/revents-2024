@@ -38,6 +38,7 @@ export default function EventDetailedChat({ eventId }: Props) {
       if (item.parentId) table[item.parentId].childNodes.push(table[item.id]);
       else dataTree.push(table[item.id]);
     });
+    console.log(table);
     return dataTree;
   }
 
