@@ -1,13 +1,16 @@
 import { Button, Divider, Form, Label } from "semantic-ui-react";
 import ModalWrapper from "../../app/common/modals/ModalWrapper";
 import { useForm, FieldValues } from "react-hook-form";
-import { useAppDispatch } from "../../app/store/store";
+import { useAppDispatch, useAppSelector } from "../../app/store/store";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { closeModal } from "../../app/common/modals/modalSlice";
 import { auth } from '../../app/config/firebase';
 import SocialLogin from "./SocialLogin";
+import { useNavigate } from "react-router-dom";
 
 export default function LoginForm() {
+  const navigate = useNavigate();
+  const { data: location } = useAppSelector(state => state.modal);
   const { register, handleSubmit, setError, formState: { isSubmitting, isValid, isDirty, errors } } = useForm({
     mode: "onTouched"
   });
@@ -17,6 +20,7 @@ export default function LoginForm() {
     try {
       await signInWithEmailAndPassword(auth, data.email, data.password);
       dispatch(closeModal());
+      navigate(location.from);
     } catch (err: any) {
       setError('root.severError', {
         type: '400', message: err.message

@@ -4,11 +4,13 @@ import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 type State = {
   authenticated: boolean;
   currentUser: AppUser | null;
+  initialised: boolean;
 };
 
 const initialState: State = {
   authenticated: false,
-  currentUser: null
+  currentUser: null,
+  initialised: false
 };
 
 
@@ -20,6 +22,7 @@ export const authSlice = createSlice({
       reducer: (state, action: PayloadAction<AppUser>) => {
         state.authenticated = true;
         state.currentUser = action.payload;
+        state.initialised = true;
       },
       prepare: (user: User) => {
         const mapped: AppUser = {
@@ -37,6 +40,7 @@ export const authSlice = createSlice({
     logout: (state) => {
       state.authenticated = false;
       state.currentUser = null;
+      state.initialised = true;
     }
   }
 });

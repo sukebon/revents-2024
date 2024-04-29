@@ -1,8 +1,7 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button, Header, Image, Item, Segment } from "semantic-ui-react";
 import { AppEvent } from "../../../app/types/events";
 import { useAppSelector } from "../../../app/store/store";
-import { toast } from "react-toastify";
 import { useState } from "react";
 import { useFireStore } from "../../../app/hooks/firestore/useFirestore";
 import { arrayRemove, arrayUnion } from "firebase/firestore";
@@ -16,6 +15,8 @@ export default function EventDetailHeader({ event }: Props) {
   const { currentUser } = useAppSelector(state => state.auth);
   const [loading, setLoading] = useState(false);
   const { update } = useFireStore('events');
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const eventImageStyle = {
     filter: 'brightness(30%)'
@@ -31,10 +32,7 @@ export default function EventDetailHeader({ event }: Props) {
   };
 
   async function toggleAttendance() {
-    if (!currentUser) {
-      toast.error('Must be logged in to do this');
-      return;
-    }
+    if (!currentUser) return navigate('/unauthorised', { state: { from: location.pathname } });
     setLoading(true);
     if (event.isGoing) {
       const attendee = event.attendees.find(x => x.id === currentUser.uid);

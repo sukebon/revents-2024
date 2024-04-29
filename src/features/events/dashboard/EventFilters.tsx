@@ -16,26 +16,31 @@ export default function EventFilters({ setQuery }: Props) {
   const { status } = useAppSelector(state => state.events);
 
   function handleSetFilter(filter: string) {
-    if (!currentUser?.uid) return;
     let q: QueryOptions[];
-    switch (filter) {
-      case 'isGoing':
-        q = [
-          { attribute: 'attendeeIds', operator: 'array-contains', value: currentUser.uid },
-          { attribute: 'date', operator: '>=', value: startDate.current }
-        ];
-        break;
-      case 'isHost':
-        q = [
-          { attribute: 'hostUid', operator: '==', value: currentUser.uid },
-          { attribute: 'date', operator: '>=', value: startDate.current }
-        ];
-        break;
-      default:
-        q = [
-          { attribute: 'date', operator: '>=', value: startDate.current }
-        ];
-        break;
+    if (!currentUser?.uid) {
+      q = [{ attribute: 'date', operator: '>=', value: startDate.current }];
+      setQuery(q);
+    } else {
+
+      switch (filter) {
+        case 'isGoing':
+          q = [
+            { attribute: 'attendeeIds', operator: 'array-contains', value: currentUser.uid },
+            { attribute: 'date', operator: '>=', value: startDate.current }
+          ];
+          break;
+        case 'isHost':
+          q = [
+            { attribute: 'hostUid', operator: '==', value: currentUser.uid },
+            { attribute: 'date', operator: '>=', value: startDate.current }
+          ];
+          break;
+        default:
+          q = [
+            { attribute: 'date', operator: '>=', value: startDate.current }
+          ];
+          break;
+      }
     }
     setFilter(filter);
     setQuery(q);

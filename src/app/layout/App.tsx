@@ -28,6 +28,7 @@ function App() {
       complete: () => { }
     });
   }, [dispatch]);
+
   return (
     <>
       {location.pathname === '/' ? <HomePage /> : (
